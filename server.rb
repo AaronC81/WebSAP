@@ -25,9 +25,25 @@ def create_initial_state(app)
   SUPPORTED_APPS[app].initial_state
 end
 
+# Gets all state for a session. Don't send this anywhere!
+def all_state(id)
+  $app_sessions[id][:state]
+end
+
 # Gets the public state for a session.
 def public_state(id)
-  $app_sessions[id][:state].reject { |k, v| k.to_s.start_with? "_" }
+  all_state(id).reject { |k, v| k.to_s.start_with? "_", "$" }
+end
+
+# Gets the public state for a session, including any locked state for a session
+# given a caller-supplied key. Locked state objects must be at the top level
+# of an object's session.
+def locked_state(id, key)
+  # If there's no key, or no locked state for that key, just return public state
+  locked = all_state(id)[:"$#{key}"]
+  return public_state(id) if key.nil? || locked.nil?
+
+  public_state(id).merge(:"$#{key}" => locked)
 end
 
 get '/apps' do
@@ -65,6 +81,8 @@ get '/apps/:id/state' do
   public_state(id).to_json
 end
 
+# TODO: Post version of /state with key
+
 post '/apps/:id/message' do
   id = params['id']
 
@@ -75,7 +93,7 @@ post '/apps/:id/message' do
   options = JSON.parse(request.body.read)
   action = options['action']
 
-  app.transform($app_sessions[id][:state], action, options)
+  app.transform(all_state(id), action, options)
 
-  public_state(id).to_json
+  locked_state(id, options['key']).to_json
 end
