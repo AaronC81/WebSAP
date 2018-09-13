@@ -1,0 +1,28 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    macaddr (1.7.1)
+      systemu (~> 2.6.2)
+    mustermann (1.0.3)
+    rack (2.0.5)
+    rack-protection (2.0.3)
+      rack
+    sinatra (2.0.3)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.3)
+      tilt (~> 2.0)
+    systemu (2.6.5)
+    tilt (2.0.8)
+    uuid (2.3.9)
+      macaddr (~> 1.0)
+
+PLATFORMS
+  x64-mingw32
+
+DEPENDENCIES
+  sinatra
+  uuid
+
+BUNDLED WITH
+   1.16.1
