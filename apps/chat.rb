@@ -13,6 +13,11 @@ class Chat
     when 'send message'
       state[:messages] << options['message']
       true
+    when 'note'
+      state[:"$#{options['key']}"] ||= { notes: [] }
+      state[:"$#{options['key']}"][:notes] << options['note']
+
+      p state
     else
       false
     end
