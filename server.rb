@@ -25,6 +25,11 @@ def create_initial_state(app)
   SUPPORTED_APPS[app].initial_state
 end
 
+# Gets the public state for a session.
+def public_state(id)
+  $app_sessions[id][:state].reject { |k, v| k.to_s.start_with? "_" }
+end
+
 get '/apps' do
   SUPPORTED_APPS.keys.to_json
 end
@@ -52,15 +57,12 @@ get '/apps/:app/new' do
   { id: new_id }.to_json
 end
 
-# TODO: ALLOW FOR PRIVATE UNSENT STATE, FOR THINGS LIKE PLAYER KEYS.
-#       Maybe prefix with _?
-
 get '/apps/:id/state' do
   id = params['id']
 
   halt 404, '{}' unless $app_sessions[id]
 
-  $app_sessions[id][:state].to_json
+  public_state(id).to_json
 end
 
 post '/apps/:id/message' do
@@ -75,5 +77,5 @@ post '/apps/:id/message' do
 
   app.transform($app_sessions[id][:state], action, options)
 
-  $app_sessions[id][:state].to_json
+  public_state(id).to_json
 end
