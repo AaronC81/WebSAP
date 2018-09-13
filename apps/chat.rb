@@ -1,7 +1,7 @@
 # A chat app.
 class Chat
   def self.name
-    "chat"
+    'chat'
   end
 
   def self.initial_state
