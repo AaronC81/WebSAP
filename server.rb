@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'json'
 require 'uuid'
+require 'securerandom'
 require_relative 'apps/chat.rb'
 
 # App providers need this stuff:
@@ -31,8 +32,8 @@ end
 get '/apps/:app/new' do
   app = params['app']
 
-  # Assign a UUID for this session
-  new_id = UUID.generate
+  # Assign a random ID which one could read out
+  new_id = SecureRandom.urlsafe_base64 4
 
   halt 403, { response: 'Invalid app' }.to_json unless
   SUPPORTED_APPS[app]
