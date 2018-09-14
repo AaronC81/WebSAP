@@ -74,6 +74,28 @@ get '/apps/:app/new' do
   { id: new_id }.to_json
 end
 
+get '/apps/:app/new/:id' do
+  app = params['app']
+
+  new_id = params['id']
+
+  halt 403, { response: 'Invalid app' }.to_json unless
+  SUPPORTED_APPS[app]
+
+  # Create a new session
+  app_session = {
+    id: new_id,
+    app: app,
+    state: create_initial_state(app)
+  }
+
+  # Add to the app_sessions array
+  $app_sessions[new_id] = app_session
+
+  # Return ID
+  { id: new_id }.to_json
+end
+
 get '/apps/:id/state' do
   id = params['id']
 
