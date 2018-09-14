@@ -94,7 +94,7 @@ post '/apps/:id/state' do
 end
 
 get '/apps/:id/hash' do
-  { hash: all_state(params['id']).hash }.to_json
+  { hash: all_state(params['id']).hash.to_s }.to_json
 end
 
 post '/apps/:id/message' do
