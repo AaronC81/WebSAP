@@ -48,7 +48,7 @@ def locked_state(id, key)
 end
 
 get '/apps' do
-  SUPPORTED_APPS.keys.to_json
+  { apps: SUPPORTED_APPS.keys }.to_json
 end
 
 get '/apps/:app/new' do
