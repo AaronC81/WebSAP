@@ -10,12 +10,12 @@ class Chat
 
   def self.transform(state, action, options)
     case action
-    when 'send message'
+    when 'send_message'
       state[:messages] << options['message']
       true
     when 'note'
-      state[:"$#{options['key']}"] ||= { notes: [] }
-      state[:"$#{options['key']}"][:notes] << options['note']
+      state[hlkey(options)] ||= { notes: [] }
+      state[hlkey(options)][:notes] << options['note']
 
       p state
     else
