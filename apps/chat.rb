@@ -1,5 +1,9 @@
+require_relative "../app_helpers.rb"
+
 # A chat app.
 class Chat
+  extend AppHelpers
+
   def self.name
     'chat'
   end
