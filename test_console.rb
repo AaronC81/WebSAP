@@ -2,6 +2,7 @@ require 'http'
 require 'json'
 
 game_id = nil
+key = nil
 
 ENDPOINT = "http://localhost:4567"
 
@@ -16,15 +17,19 @@ loop do
     data = JSON.parse(Http.get("#{ENDPOINT}/apps/#{app}/new").to_s)
     puts data['id']
     game_id = data['id']
+  when 'key'
+    key = input.split[1]
   when 'msg'
     action = input.split[1]
     other_args = input.split
     other_args.shift
     other_args.shift
 
-    %x{ http --json POST #{ENDPOINT}/apps/#{game_id}/message action=#{action} #{other_args.join} }
+    puts %x{ http --json POST #{ENDPOINT}/apps/#{game_id}/message action=#{action} key=#{key} #{other_args.join} }
   when 'state'
-    puts JSON.parse(Http.get("#{ENDPOINT}/apps/#{game_id}/state").to_s)
+    puts JSON.parse(Http.post("#{ENDPOINT}/apps/#{game_id}/state", json: {
+      key: key
+    }).to_s)
   else
     puts "Unknown"
   end
