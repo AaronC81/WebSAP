@@ -25,11 +25,9 @@ loop do
     other_args.shift
     other_args.shift
 
-    puts %x{ http --json POST #{ENDPOINT}/apps/#{game_id}/message action=#{action} key=#{key} #{other_args.join} }
+    puts %x{ http --json POST #{ENDPOINT}/apps/#{game_id}/message action=#{action} key=#{key} #{other_args.join " "} }
   when 'state'
-    puts JSON.parse(Http.post("#{ENDPOINT}/apps/#{game_id}/state", json: {
-      key: key
-    }).to_s)
+    puts Http.post("#{ENDPOINT}/apps/#{game_id}/state", json: { key: key })
   else
     puts "Unknown"
   end
