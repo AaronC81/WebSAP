@@ -81,7 +81,16 @@ get '/apps/:id/state' do
   public_state(id).to_json
 end
 
-# TODO: Post version of /state with key
+post '/apps/:id/state' do
+  id = params['id']
+
+  halt 404, '{}' unless $app_sessions[id]
+
+  options = JSON.parse(request.body.read)
+  key = options['key']
+
+  locked_state(id, options['key']).to_json
+end
 
 post '/apps/:id/message' do
   id = params['id']
