@@ -3,6 +3,7 @@ require 'json'
 require 'uuid'
 require 'securerandom'
 require_relative 'apps/chat.rb'
+require_relative 'apps/tictactoe.rb'
 
 # App providers need this stuff:
 #   name: The name of the app
@@ -11,7 +12,7 @@ require_relative 'apps/chat.rb'
 #              the state to transition to the new state. True or false depending
 #              on whether the message was valid or not.
 
-SUPPORTED_APPS = { 'chat' => Chat }.freeze
+SUPPORTED_APPS = { 'chat' => Chat, 'tictactoe' => TicTacToe }.freeze
 
 before do
   content_type :json
@@ -102,7 +103,7 @@ post '/apps/:id/message' do
   options = JSON.parse(request.body.read)
   action = options['action']
 
-  app.transform(all_state(id), action, options)
+  halt 401, { error: 'Invalid' }.to_json unless app.transform(all_state(id), action, options)
 
   locked_state(id, options['key']).to_json
 end
