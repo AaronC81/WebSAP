@@ -93,6 +93,10 @@ post '/apps/:id/state' do
   locked_state(id, options['key']).to_json
 end
 
+get '/apps/:id/hash' do
+  { hash: all_state.hash }.to_json
+end
+
 post '/apps/:id/message' do
   id = params['id']
 
