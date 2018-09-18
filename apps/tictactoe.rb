@@ -1,5 +1,9 @@
 require_relative "../app_helpers.rb"
 
+def same?(arr)
+  arr.uniq.length == 1
+end
+
 # This showcases how a 'player' system might work.
 # Don't identify players by their key, because then other people could pretend
 # to be them.
@@ -10,7 +14,30 @@ class TicTacToe
   extend AppHelpers
 
   def self.name
-    "tictactoe"
+    'tictactoe'
+  end
+
+  def self.winner(board)
+    # Check for a row win
+    (0..2).each do |row|
+      return board[row][0] if same? [board[row][0], board[row][1], board[row][2]]
+    end
+
+    # Check for a column win
+    (0..2).each do |col|
+      return board[0][col] if same? [board[0][col], board[1][col], board[2][col]]
+    end
+
+    # Check /
+    return board[2][0] if same? [board[2][0], board[1][1], board[0][2]]
+
+    # Check \
+    return board[2][2] if same? [board[2][2], board[1][1], board[0][0]]
+
+    # Check if the board is full
+    return "?" unless board.flatten.include? nil
+
+    nil
   end
 
   def self.initial_state
@@ -81,6 +108,9 @@ class TicTacToe
 
       # Transition to other player
       state[:phase_player] = (state[:phase_player] == 'X' ? 'O' : 'X')
+
+      # Set winner
+      state[:winner] = winner(state[:board])
 
       true
     else
