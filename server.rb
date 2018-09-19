@@ -4,6 +4,7 @@ require 'uuid'
 require 'securerandom'
 require_relative 'apps/chat.rb'
 require_relative 'apps/tictactoe.rb'
+require_relative 'socket/socket.rb'
 
 # App providers need this stuff:
 #   name: The name of the app
@@ -130,6 +131,12 @@ post '/apps/:id/message' do
   action = options['action']
 
   halt 401, { error: 'Invalid' }.to_json unless app.transform(all_state(id), action, options)
+
+  begin
+    socket_state_update(id)
+  rescue
+    puts 'WARNING: Failed to emit socket state updates'
+  end
 
   locked_state(id, options['key']).to_json
 end
