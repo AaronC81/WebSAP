@@ -37,6 +37,9 @@ Thread.start do
         sessions = conn.gets.strip.split(',')
         $socket_clients << [sessions, conn]
         puts "A client is interested in: #{sessions.join(',')}"
+        
+        # Write a confirmation which also prompts them to download first state
+        conn.print('S')
       rescue e
         # If the client breaks something, just ignore them
         puts "A client socket encountered an exception: #{e}"
