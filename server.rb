@@ -4,6 +4,7 @@ require 'uuid'
 require 'securerandom'
 require_relative 'apps/chat.rb'
 require_relative 'apps/tictactoe.rb'
+require_relative 'apps/poker.rb'
 require_relative 'socket/socket.rb'
 
 # App providers need this stuff:
@@ -13,7 +14,7 @@ require_relative 'socket/socket.rb'
 #              the state to transition to the new state. True or false depending
 #              on whether the message was valid or not.
 
-SUPPORTED_APPS = { 'chat' => Chat, 'tictactoe' => TicTacToe }.freeze
+SUPPORTED_APPS = { 'chat' => Chat, 'tictactoe' => TicTacToe, 'poker' => Poker }.freeze
 
 before do
   content_type :json
