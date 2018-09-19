@@ -56,6 +56,7 @@ class Poker
     when 'start'
       # Start the round
       state[:phase] = 'start'
+      state[:table] = []
 
       # Find player locked state keys
       locked_state_keys = state.select { |k, v| k.to_s.start_with? '$' }.keys
@@ -93,6 +94,22 @@ class Poker
       # Set their bet and remove it from their balance
       state[:players][player_id][:bet] = bet_amount
       state[:players][player_id][:money] -= bet_amount
+
+      true
+    when 'flop'
+      # Draw three cards
+      # TODO: Check anything whatsoever
+
+      first_card = state[:_deck].sample
+      state[:_deck].delete first_card
+      second_card = state[:_deck].sample
+      state[:_deck].delete second_card
+      third_card = state[:_deck].sample
+      state[:_deck].delete third_card
+
+      state[:table] << first_card
+      state[:table] << second_card
+      state[:table] << third_card
 
       true
     else
