@@ -113,6 +113,15 @@ class TicTacToe
       state[:winner] = winner(state[:board])
 
       true
+    when 'restart'
+      # Resets the game. ASSUMES THAT TWO PLAYERS ARE CONNECTED.
+
+      state[:phase] = 'turn'
+      state[:phase_player] = initial_state[:phase_player]
+      state[:board] = initial_state[:board]
+      state[:winner] = initial_state[:winner]
+
+      true
     else
       false
     end
