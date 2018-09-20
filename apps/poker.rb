@@ -114,9 +114,6 @@ class Poker
       player_id = state[hlkey(options)][:player_id]
       state[:players][player_id][:has_folded] = true
 
-      # TODO: Check if there's only one player left, if so reward them and go
-      #       to "end" phase, revealing cards
-
       # Find player locked state keys
       locked_state_keys = state.select { |k, v| k.to_s.start_with? '$' }.keys
 
