@@ -19,7 +19,8 @@ class Poker
       phase: 'waiting',
       table: [],
       _deck: START_DECK.clone,
-      winners: []
+      winners: [],
+      win_description: nil
     }
   end
 
@@ -43,7 +44,7 @@ class Poker
   def self.rank(hole, table)
     # The lib wants T rather than 10
     hand = PokerHand.new((hole + table).map { |x| x.gsub('10', 'T') })
-    hand.score.first.first
+    [hand.score.first.first, hand.hand_rating]
   end
 
   def self.transform(state, action, options)
@@ -69,6 +70,7 @@ class Poker
       state[:table] = []
       state[:_deck] = START_DECK.clone
       state[:winners] = []
+      state[:win_description] = nil
 
       # Find player locked state keys
       locked_state_keys = state.select { |k, v| k.to_s.start_with? '$' }.keys
@@ -131,6 +133,7 @@ class Poker
         # End the round
         state[:phase] = 'end'
         state[:winners] = active_players
+        state[:win_description] = 'all folded'
 
         # Calculate the pot and reveal cards
         pot = 0
@@ -142,7 +145,7 @@ class Poker
 
         # Award the pot
         state[:players][active_players.first][:money] += pot
-      end        
+      end
 
       true
     when 'flop'
@@ -196,6 +199,7 @@ class Poker
       pot = 0
       highest_score = -1
       highest_score_players = []
+      highest_score_desc = ""
       # For each player...
       locked_state_keys.each do |key|
         # Get their player ID
@@ -208,7 +212,7 @@ class Poker
         state[:players][player_id][:revealed_cards] = hole_cards
 
         # Work out their score
-        score = rank(hole_cards, state[:table])
+        score, desc = rank(hole_cards, state[:table])
 
         # Check if it's joint highest
         if score == highest_score
@@ -219,6 +223,7 @@ class Poker
         if score > highest_score
           highest_score = score
           highest_score_players = [player_id]
+          highest_score_desc = desc
         end
 
         # Add their bet to the pots
@@ -227,6 +232,7 @@ class Poker
 
       # Set the winner
       state[:winners] = highest_score_players
+      state[:win_description] = highest_score_desc
 
       # Award them the pot
       highest_score_players.each do |winning_id|
