@@ -53,6 +53,8 @@ class Poker
 
     case action
     when 'join'
+      return false if state[:players].length >= 9
+
       # Register this player - use strings in case we don't use numbers in
       # the future
       state[hlkey(options)] = initial_locked_player_state
