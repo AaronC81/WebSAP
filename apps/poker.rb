@@ -12,13 +12,14 @@ class Poker
   end
 
   def self.initial_state
-    # Phases: waiting, start, flop, turn, river
+    # Phases: waiting, start, flop, turn, river, end
     # TODO: Make deck reset on end
     {
       players: {},
       phase: 'waiting',
       table: [],
       _deck: START_DECK.clone,
+      winners: []
     }
   end
 
@@ -27,7 +28,8 @@ class Poker
       nickname: nil,
       money: 1000,
       bet: 0,
-      has_folded: false
+      has_folded: false,
+      revealed_cards: []
     }
   end
 
@@ -66,6 +68,7 @@ class Poker
       state[:phase] = 'start'
       state[:table] = []
       state[:_deck] = START_DECK.clone
+      state[:winners] = []
 
       # Find player locked state keys
       locked_state_keys = state.select { |k, v| k.to_s.start_with? '$' }.keys
@@ -84,9 +87,10 @@ class Poker
         # Give them the cards
         state[key][:hole_cards] = [first_card, second_card]
 
-        # Reset their bet
+        # Reset them
         state[:players][player_id][:bet] = 0
         state[:players][player_id][:has_folded] = false
+        state[:players][player_id][:revealed_cards] = []
       end
 
       true
@@ -110,8 +114,38 @@ class Poker
       player_id = state[hlkey(options)][:player_id]
       state[:players][player_id][:has_folded] = true
 
-      # TODO: Check if there's only one player left, if so reward them and start
-      #       again
+      # TODO: Check if there's only one player left, if so reward them and go
+      #       to "end" phase, revealing cards
+
+      # Find player locked state keys
+      locked_state_keys = state.select { |k, v| k.to_s.start_with? '$' }.keys
+
+      # Find how many players are still playing (i.e. not folded)
+      active_players = []
+      locked_state_keys.each do |key|
+        # Get their player ID
+        this_player_id = state[key][:player_id]
+
+        active_players << this_player_id unless state[:players][this_player_id][:has_folded]
+      end
+
+      # If there's only one player left...
+      if active_players.length == 1
+        # End the round
+        state[:phase] = 'end'
+        state[:winners] = active_players
+
+        # Calculate the pot and reveal cards
+        pot = 0
+        locked_state_keys.each do |key|
+          this_player_id = state[key][:player_id]
+          pot += state[:players][this_player_id][:bet]
+          state[:players][this_player_id][:revealed_cards] = state[key][:hole_cards]
+        end
+
+        # Award the pot
+        state[:players][active_players.first][:money] += pot
+      end        
 
       true
     when 'flop'
@@ -155,8 +189,52 @@ class Poker
       
       state[:table] << fifth_card
 
-      # TODO: Find winner
       true
+    when 'end'
+      state[:phase] = 'end'
+
+      # Find player locked state keys
+      locked_state_keys = state.select { |k, v| k.to_s.start_with? '$' }.keys
+
+      pot = 0
+      highest_score = -1
+      highest_score_players = []
+      # For each player...
+      locked_state_keys.each do |key|
+        # Get their player ID
+        player_id = state[key][:player_id]
+
+        # Get their hole cards
+        hole_cards = state[key][:hole_cards]
+
+        # Reveal their cards
+        state[:players][player_id][:revealed_cards] = hole_cards
+
+        # Work out their score
+        score = rank(hole_cards, state[:table])
+
+        # Check if it's joint highest
+        if score == highest_score
+          highest_score_players << player_id
+        end
+
+        # Check if it's the new highest score
+        if score > highest_score
+          highest_score = score
+          highest_score_players = [player_id]
+        end
+
+        # Add their bet to the pots
+        pot += state[:players][player_id][:bet]
+      end
+
+      # Set the winner
+      state[:winners] = highest_score_players
+
+      # Award them the pot
+      highest_score_players.each do |winning_id|
+        state[:players][winning_id][:money] += pot / highest_score_players.length
+      end
     else
       false
     end
